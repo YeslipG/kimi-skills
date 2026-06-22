@@ -1,0 +1,23 @@
+{
+  "skill_name": "chinese-equipment-manual-formatter",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "把附件里的旧版 .doc 设备说明书统一排版。封面和目录不要页码，正文从1开始，页脚写第X页/共Y页；页眉用封面完整标题但不要公司名，左侧加竖线。标题、正文和表格按我们之前的规则。",
+      "expected_output": "A new verified DOCX preserving content and media, with standardized headings/fonts/tables, updated TOC, front matter without visible header/footer, and body PAGE/SECTIONPAGES fields.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "继续处理这份玉米加工设备说明书，其他要求和前面一样。重点检查三级标题编号、目录页码、图片位置以及最后一页的总页数。不要覆盖原文件。",
+      "expected_output": "A separately named DOCX that applies the stored formatting standard, correctly infers the prior requirements, updates numbering and TOC, and visually verifies representative and final pages.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "这份 docx 已经有页眉页脚，但总页数把封面和目录算进去了。请修正为正文独立计页，并顺便统一中文黑体/宋体和西文 Times New Roman，表头灰底加粗。",
+      "expected_output": "A corrected DOCX using a body section restarted at 1, PAGE plus SECTIONPAGES footer fields, clean front matter, correct fonts and table styling, with no content loss or extra blank page.",
+      "files": []
+    }
+  ]
+}

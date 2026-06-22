@@ -1,0 +1,206 @@
+# 合同全链路处理工作流配置
+# 修改此文件即可扩展或调整工作流步骤，无需改动执行逻辑
+
+workflow:
+  name: "合同全链路处理工作流"
+  version: "1.0.0"
+  description: |
+    接收用户提供的合同 PDF/图片，依次执行：
+    1) 录入飞书多维表格（查重+建档）
+    2) 生成 Word 报价单
+    3) 生成 Word 发货单
+    4) 生成 Excel 派工单
+
+# ========== 输出目录规则 ==========
+# 所有产出文件统一放入以合同文件名命名的文件夹中
+output:
+  base_dir: "./output"                          # 根输出目录
+  folder_naming: "{contract_stem}"              # 文件夹名 = 合同文件名（不含扩展名）
+  auto_create: true                             # 执行前自动创建
+  # 示例：合同文件为 "SST-2026-06-003.pdf"
+  #       → 产出目录为 "./output/SST-2026-06-003/"
+
+# ========== 全局输入 ==========
+# 用户必须提供的输入，由工作流启动时收集
+global_inputs:
+  - name: contract_file
+    label: "合同文件"
+    type: file
+    required: true
+    description: "PDF 或图片格式的合同/采购订单"
+
+  - name: reference_file
+    label: "历史参考合同/单价表（可选）"
+    type: file
+    required: false
+    description: |
+      仅在生成报价单时需要。若提供，则用于历史单价匹配；
+      若不提供，报价单中所有项目将标注"参考询价"。
+
+# ========== 工作步骤 ==========
+# 新增步骤时只需在此追加即可，执行引擎会自动识别
+steps:
+  - id: base
+    name: "录入合同到多维表格"
+    skill: "contract-to-base"
+    description: "提取合同关键信息，查重后录入飞书多维表格"
+    enabled_by_default: true
+    inputs:
+      - name: contract_file
+        source: global
+        ref: contract_file
+    outputs:
+      - name: contract_no
+        label: "原始合同编号"
+      - name: buyer
+        label: "采购方（甲方/买受人）"
+      - name: seller
+        label: "销售方（乙方/出卖人）"
+      - name: amount
+        label: "合同金额"
+      - name: signing_date
+        label: "签订日期"
+      - name: product_list
+        label: "产品清单"
+      - name: record_id
+        label: "多维表格记录编号"
+
+  - id: quote
+    name: "生成报价单"
+    skill: "contract-to-quote"
+    description: "根据合同内容生成标准格式 Word 报价单"
+    enabled_by_default: true
+    inputs:
+      - name: contract_file
+        source: global
+        ref: contract_file
+      - name: reference_file
+        source: global
+        ref: reference_file
+      - name: buyer
+        source: step
+        ref: base.buyer
+      - name: amount
+        source: step
+        ref: base.amount
+      - name: product_list
+        source: step
+        ref: base.product_list
+    outputs:
+      - name: file_path
+        label: "报价单文件路径"
+
+  - id: delivery
+    name: "生成发货单"
+    skill: "contract-to-delivery-note"
+    description: "根据合同内容生成标准格式 Word 发货单"
+    enabled_by_default: true
+    inputs:
+      - name: contract_file
+        source: global
+        ref: contract_file
+      - name: buyer
+        source: step
+        ref: base.buyer
+      - name: seller
+        source: step
+        ref: base.seller
+      - name: product_list
+        source: step
+        ref: base.product_list
+    outputs:
+      - name: file_path
+        label: "发货单文件路径"
+
+  - id: dispatch
+    name: "生成派工单"
+    skill: "production-dispatch-order"
+    description: "根据合同内容生成标准格式 Excel 派工单"
+    enabled_by_default: true
+    inputs:
+      - name: contract_file
+        source: global
+        ref: contract_file
+      - name: buyer
+        source: step
+        ref: base.buyer
+      - name: product_list
+        source: step
+        ref: base.product_list
+    outputs:
+      - name: file_path
+        label: "派工单文件路径"
+
+# ========== 数据流映射 ==========
+# 定义步骤之间的数据传递关系
+data_flow:
+  # base → quote
+  - from: base
+    to: quote
+    mappings:
+      - source: buyer
+        target: buyer
+      - source: amount
+        target: amount
+      - source: product_list
+        target: product_list
+
+  # base → delivery
+  - from: base
+    to: delivery
+    mappings:
+      - source: buyer
+        target: buyer
+      - source: seller
+        target: seller
+      - source: product_list
+        target: product_list
+
+  # base → dispatch
+  - from: base
+    to: dispatch
+    mappings:
+      - source: buyer
+        target: buyer
+      - source: product_list
+        target: product_list
+
+# ========== 补充信息提示模板 ==========
+# 局部执行模式下，每个步骤的默认补充信息询问文本
+supplement_prompts:
+  base: |
+    【录入多维表格】是否需要补充以下信息？（如无补充请直接确认）
+    - 目标多维表格的 base-token（若不补充，将使用默认配置）
+    - 特殊字段映射或备注信息
+
+  quote: |
+    【生成报价单】是否需要补充以下信息？（如无补充请直接确认）
+    - 额外的历史参考合同/单价表文件（用于匹配历史单价）
+    - 特殊报价条款或备注
+    - 自定义有效期天数（默认当前日期+30天）
+
+  delivery: |
+    【生成发货单】是否需要补充以下信息？（如无补充请直接确认）
+    - 收货人姓名/电话（若合同中未明确）
+    - 交货地点补充说明
+    - 物料备注的自定义内容
+
+  dispatch: |
+    【生成派工单】是否需要补充以下信息？（如无补充请直接确认）
+    - 完成日期（若不补充，将使用合同交货日期）
+    - 特殊要求或工艺说明
+    - 文件编号
+
+# ========== 执行模式配置 ==========
+execution:
+  # 全套执行：自动连续执行所有步骤，中间不再提问
+  full_mode:
+    ask_questions: false
+    stop_on_error: false
+    continue_on_warning: true
+
+  # 局部执行：用户可勾选步骤，每个步骤可补充信息
+  partial_mode:
+    ask_questions: true
+    stop_on_error: true
+    continue_on_warning: false

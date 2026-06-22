@@ -1,0 +1,85 @@
+{
+  "skill_name": "contract-to-delivery-note",
+  "evals": [
+    {
+      "id": 1,
+      "name": "standard-contract-conversion",
+      "prompt": "请将以下合同OCR结果转换为Word发货单：\n\n合同号：GHJH20260228\n需方：阳泉集团\n供方：北京国华技术有限公司\n\n物料清单：\n| 序号 | 物料编码 | 物料名称 | 规格型号 | 数量 | 单位 | 单价 | 金额 | 备注 |\n|------|----------|----------|----------|------|------|------|------|------|\n| 1 | 0101-A-002 | 头轮 | /6L | 2 | 件 | 1500 | 3000 | 伊品 |\n| 2 | 0102-B-003 | 尾轮 | 3/6L | 2 | 件 | 520 | 1040 | 伊品 |\n\n交货地点：山西省运城市稷山县\n收货人：张明\n联系电话：13812345678\n\n请生成符合专业排版V2版标准的Word发货单。",
+      "expected_output": "生成的Word文档应包含：1) 7列表格（序号、物料编码、物料名称、规格型号、数量、单位、备注）；2) 无价格信息（单价、金额不显示）；3) 文件名格式为{日期}_发货单_GHJH20260228.docx；4) 所有格式符合规范（微软雅黑字体、蓝色边框、浅蓝表头背景）",
+      "files": [],
+      "assertions": [
+        {
+          "description": "表格为7列结构",
+          "type": "file_check"
+        },
+        {
+          "description": "表格中无单价/金额列",
+          "type": "content_check"
+        },
+        {
+          "description": "发货单位为北京国华技术有限公司",
+          "type": "content_check"
+        },
+        {
+          "description": "文件名格式正确（日期在前）",
+          "type": "file_check"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "invalid-shipping-company",
+      "prompt": "请将以下合同转换为发货单，应该报错：\n\n合同号：TEST2024001\n需方：某某公司\n供方：某某贸易有限公司（非预设三家公司）\n\n物料：螺丝钉 100个\n交货地点：北京市\n\n请处理此合同。",
+      "expected_output": "应报错并显示'错误的发货单位'，不生成Word文档。",
+      "files": [],
+      "assertions": [
+        {
+          "description": "报告错误'错误的发货单位'",
+          "type": "content_check"
+        },
+        {
+          "description": "不生成Word文档",
+          "type": "file_check"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "missing-remarks-detection",
+      "prompt": "请将以下合同转换为发货单，应该报错：\n\n合同号：TEST2024002\n需方：阳泉集团\n供方：南通厚普机械科技有限公司\n\n物料清单（缺少备注）：\n| 序号 | 物料编码 | 物料名称 | 数量 | 单位 |\n| 1 | CODE001 | 轴承 | 10 | 套 |\n\n请处理此合同。",
+      "expected_output": "应报错并显示'物料备注不能为空'，不生成Word文档。",
+      "files": [],
+      "assertions": [
+        {
+          "description": "报告错误'物料备注不能为空'",
+          "type": "content_check"
+        },
+        {
+          "description": "不生成Word文档",
+          "type": "file_check"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "html-table-extraction",
+      "prompt": "请从以下HTML格式OCR结果提取信息并生成发货单：\n\n```html\n<table>\n<tr><td>合同号</td><td>GHTZ20250315</td></tr>\n<tr><td>需方</td><td>宁波华康生物</td></tr>\n<tr><td>供方</td><td>北京国华科技集团有限公司</td></tr>\n<tr><td>交货地点</td><td>浙江省宁波市</td></tr>\n<tr><td>收货人</td><td>李华</td></tr>\n<tr><td>联系电话</td><td>13987654321</td></tr>\n</table>\n\n<table>\n<tr><td>序号</td><td>物料编码</td><td>物料名称</td><td>规格</td><td>数量</td><td>单位</td><td>备注</td></tr>\n<tr><td>1</td><td>WG-001</td><td>斗链</td><td>除尘</td><td>54</td><td>个</td><td>货位A01</td></tr>\n<tr><td>2</td><td>WG-002</td><td>斗子</td><td>标准</td><td>50</td><td>个</td><td>货位A02</td></tr>\n</table>\n```\n\n请生成Word发货单。",
+      "expected_output": "正确从HTML表格提取信息，生成7列表格的Word发货单，包含2行物料数据，备注栏正确显示'货位A01'和'货位A02'。",
+      "files": [],
+      "assertions": [
+        {
+          "description": "正确识别2行物料数据",
+          "type": "file_check"
+        },
+        {
+          "description": "备注栏显示货位信息",
+          "type": "content_check"
+        },
+        {
+          "description": "表格为7列结构",
+          "type": "file_check"
+        }
+      ]
+    }
+  ]
+}
