@@ -18,6 +18,12 @@
       "prompt": "这份 docx 已经有页眉页脚，但总页数把封面和目录算进去了。请修正为正文独立计页，并顺便统一中文黑体/宋体和西文 Times New Roman，表头灰底加粗。",
       "expected_output": "A corrected DOCX using a body section restarted at 1, PAGE plus SECTIONPAGES footer fields, clean front matter, correct fonts and table styling, with no content loss or extra blank page.",
       "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "两个说明书最后一页是背面，都是不计入页码的。按前面的说明书排版规则处理，正文页脚仍用第X页/共Y页，但最后背面页不要页眉页脚，也不要算进共Y页。",
+      "expected_output": "Each DOCX uses three logical sections: front matter, body, and an unnumbered final back-cover section. Body footers use live PAGE plus SECTIONPAGES fields, all body footer variants match, the final back-cover page is blank in header/footer, no extra blank page is introduced, TOC and fields are updated, and footer Chinese literals are not corrupted.",
+      "files": []
     }
   ]
 }

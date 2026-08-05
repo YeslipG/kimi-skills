@@ -1,0 +1,25 @@
+{
+  "skill_name": "SalesContract-GH",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "报价单+模板生成合同",
+      "prompt": "文件一是要做的合同内容：C:/Users/yesli/OneDrive/桌面/260725 吉宏-国华报价单.doc；文件二是合同模板：C:/Users/yesli/OneDrive/桌面/260228乡宁吉宏排料机构总成销售合同49450.doc。请按模板格式生成销售合同，签订日期写今天。",
+      "expected_output": "生成一份与模板格式一致的《工矿机械产品买卖合同》Word文档，合同编号更新，签订日期为今天，标的物为报价单中的直线轴承、油封、连杆、继电器，金额4000元，出卖方联系方式按报价单更新。",
+      "files": [
+        "C:/Users/yesli/OneDrive/桌面/260725 吉宏-国华报价单.doc",
+        "C:/Users/yesli/OneDrive/桌面/260228乡宁吉宏排料机构总成销售合同49450.doc"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "根据报价单和模板做新合同",
+      "prompt": "我这有份报价单 C:/Users/yesli/OneDrive/桌面/260725 吉宏-国华报价单.doc 和一份合同模板 C:/Users/yesli/OneDrive/桌面/260228乡宁吉宏排料机构总成销售合同49450.doc，你按模板给我做一份新销售合同，日期用今天。",
+      "expected_output": "生成Word销售合同，保留模板版式，替换报价单内容和今天日期。",
+      "files": [
+        "C:/Users/yesli/OneDrive/桌面/260725 吉宏-国华报价单.doc",
+        "C:/Users/yesli/OneDrive/桌面/260228乡宁吉宏排料机构总成销售合同49450.doc"
+      ]
+    }
+  ]
+}

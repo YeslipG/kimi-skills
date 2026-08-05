@@ -30,6 +30,8 @@ Complete all applicable checks before delivery.
 - [ ] First body page shows `第1页/共Y页`.
 - [ ] Last body page shows `第Y页/共Y页`.
 - [ ] Footer uses `PAGE` and `SECTIONPAGES`, not a typed number or `NUMPAGES`.
+- [ ] If the final page is a back cover, it is a separate unnumbered section and is excluded from the body `SECTIONPAGES` total.
+- [ ] Footer literal text contains the real Chinese characters `第`, `页`, and `共`; none were replaced by `?` or mojibake.
 
 ## Header and tables
 
@@ -53,6 +55,8 @@ Render or export the final document and inspect at least:
 - [ ] Last page.
 
 Check for blank pages, image shifts, clipped content, widows/orphans, isolated headings, unexpected font substitutions, incorrect fields, and inconsistent header/footer variants.
+
+If PDF export or full rendering hangs, do not retry indefinitely. Use Word repagination/page statistics, direct Word open/render checks, header/footer field inspection, and package integrity checks, then record that fallback verification method in the completion report.
 
 ## Final artifact
 
