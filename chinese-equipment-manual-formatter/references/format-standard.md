@@ -84,6 +84,8 @@ A paragraph left border is an acceptable implementation of the decorative line w
 - Visible format: `第X页/共Y页`.
 - Use live fields: `第{ PAGE }页/共{ SECTIONPAGES }页`.
 - Do not use `NUMPAGES` when front matter must be excluded from the total.
+- If the final rendered page is a back side/back cover and the user says it is not counted, create a separate final section for that page. Its header/footer variants must be blank, and the body footer total must remain `SECTIONPAGES` for the body section only.
+- When generating footer literals by script, write `第`, `页`, and `共` through a Unicode-safe path and verify they did not become `?` after Word updates.
 
 ## Output
 
