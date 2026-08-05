@@ -1,0 +1,64 @@
+{
+  "skill_name": "handwritten-reconciliation",
+  "evals": [
+    {
+      "id": 1,
+      "name": "real-handwritten-bill",
+      "prompt": "请将这张手写对账单转换为 Excel 表格。这是一张2016年1月配件采购对账单，包含12条采购记录，涉及多个供应商和配件类型。请仔细识别每一行的日期、供应商名称、物品名称、数量、单价和总价，并确保计算正确。",
+      "expected_output": "生成的 Excel 应包含：1) 表头为8列的标准表格；2) 约12-15行数据（包含同一日期多行的情况）；3) 核对报告说明计算一致性状况；4) 特别注意总计金额 52308 元与手写总计是否一致。",
+      "files": ["test_image_1.jpg"],
+      "assertions": [
+        {
+          "description": "生成的 Excel 文件包含8列正确表头",
+          "type": "file_check"
+        },
+        {
+          "description": "表格包含至少12行有效数据",
+          "type": "file_check"
+        },
+        {
+          "description": "核对报告包含计算一致性状况说明",
+          "type": "content_check"
+        },
+        {
+          "description": "各行列的数量×单价计算正确",
+          "type": "calculation_check"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "standard-receipt-text",
+      "prompt": "请模拟处理一张手写收据：2024年3月15日购买办公用品，A4纸5包单价25元；签字笔1盒单价30元；笔记本3本单价15元。请生成对应的 Excel 对账表。",
+      "expected_output": "即使只有文字描述，也应生成包含3行数据的 Excel 表格（A4纸、签字笔、笔记本），计算正确（125元、30元、45元），并有核对报告。",
+      "files": [],
+      "assertions": [
+        {
+          "description": "表格包含3行数据",
+          "type": "file_check"
+        },
+        {
+          "description": "A4纸总价125元计算正确",
+          "type": "calculation_check"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "calculation-error-detection",
+      "prompt": "请处理这张对账单并校验计算：铅笔10支×2元=20元；橡皮5块×3元=14元（应为15元）；尺子3把×5元=15元。请生成 Excel 并指出计算错误。",
+      "expected_output": "核对报告应指出橡皮的计算不一致，并在 Excel 中使用正确的总价15元。",
+      "files": [],
+      "assertions": [
+        {
+          "description": "核对报告明确指出计算错误",
+          "type": "content_check"
+        },
+        {
+          "description": "橡皮行使用正确的15元而非14元",
+          "type": "calculation_check"
+        }
+      ]
+    }
+  ]
+}
