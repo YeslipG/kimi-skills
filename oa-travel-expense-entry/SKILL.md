@@ -19,6 +19,10 @@ description: 从差旅费报销单文件（.docx / .xlsx / 图片）提取行程
 `running:true` 且 `extension_connected:true` 才能继续；否则按 kimi-webbridge skill 里的
 `references/operations.md` 处理，不要自行猜测修复。
 
+实测补充：status 报 "PID file exists but HTTP probe failed" 是守护进程卡死，
+`~/.kimi-webbridge/bin/kimi-webbridge restart` 即可恢复；重启后扩展需要几秒自动重连，
+先 `sleep 5` 再查一次 status，多半已 `extension_connected:true`，不要急着让用户开浏览器。
+
 ## 前置条件
 
 - 用户已给出：① 报销单文件（docx/xlsx/图片）② OA 表单网址
@@ -58,7 +62,7 @@ description: 从差旅费报销单文件（.docx / .xlsx / 图片）提取行程
    每填一批用 `WfForm.getFieldValue` 读回验证
 4. **截图核对**：全页截图给用户确认
 
-### 三个必踩的坑
+### 必踩的坑
 
 - **中文乱码**：Windows Git Bash 下 `curl -d` 提交含中文的 JSON 会损坏字节。
   用本 skill 的 `scripts/webbridge_eval.py` 代替 curl 执行所有含中文的 evaluate：
@@ -66,6 +70,8 @@ description: 从差旅费报销单文件（.docx / .xlsx / 图片）提取行程
 - **select 下拉**：两次 webbridge 调用之间下拉会自动关闭，「开下拉+点选项」必须在同一次 evaluate 内完成。
   更稳的做法：直接用 `changeFieldValue` 设选项 id（"0","1",…），再用 `getSelectShowName` 验证
 - **日期控件是纯日期**：`YYYY-MM-DD HH:mm` 会被拒（字段变空），只能填 `YYYY-MM-DD`，时刻信息进不了表单
+- **标题 requestname 写不进**：`changeFieldValue("requestname",…)` 不生效——表单会按
+  「差旅费报销单-姓名-发起日期」自动生成标题。不要尝试手改，用自动标题即可
 
 ### 提交纪律
 
