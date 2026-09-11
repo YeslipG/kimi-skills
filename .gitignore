@@ -2,8 +2,30 @@ __pycache__/
 *.pyc
 
 # 敏感配置文件（仅对未跟踪的新文件生效，已入库的不受影响）
+# 注意：已被 git 跟踪的文件不受这里约束，必须 git rm --cached 才会停止跟踪。
 .env
 .env.*
 !.env.example
 !.env.sample
 !.env.template
+!.env.dist
+
+# 证书 / 私钥 / 凭据
+*.pem
+*.key
+*.pfx
+*.p12
+*.jks
+*.keystore
+*.ppk
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+secrets.json
+credentials.json
+service-account.json
+.netrc
+.npmrc
+.pypirc
+
