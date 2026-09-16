@@ -1,6 +1,6 @@
 ---
 name: quotation-generator
-description: Generate professional Chinese quotation documents (报价单) for Beijing GuoHua or Nantong Hope. Use whenever the user asks for a quotation, 报价单, 报价, price quote, quote document, or needs to turn a contract/screenshot into a formatted Word quotation.
+description: Generate professional Chinese quotation documents (报价单) for Beijing GuoHua or Nantong Hope. Use whenever the user asks for a quotation, 报价单, 报价, price quote, quote document, or needs to turn a contract/screenshot into a formatted Word quotation. Also use whenever a 梅花 (Meihua) inquiry sheet (询价单 xlsx) appears — price it against the 梅花年度合同 attachment price list and generate the quotation.
 ---
 
 # Quotation Generator
@@ -18,8 +18,8 @@ Generate formatted quotation documents for two company versions: **北京国华*
 
 ### Step 1: Identify the Company Version
 
-- **北京国华 / 国华** -> Use template: `C:/Users/yesli/OneDrive/桌面/2026项目/260426进行中/260402段王报价单99000/国华/260402报价单模板段王-国华.docx`
-- **南通厚普 / 厚普** -> Use template: `C:/Users/yesli/OneDrive/桌面/2026项目/260426进行中/260402段王报价单99000/厚普/260402报价单模板段王-厚普.docx`
+- **北京国华 / 国华** -> Use template: `C:/Users/yesli/Desktop/2026项目/260426进行中/260402段王报价单99000/国华/260402报价单模板段王-国华.docx`
+- **南通厚普 / 厚普** -> Use template: `C:/Users/yesli/Desktop/2026项目/260426进行中/260402段王报价单99000/厚普/260402报价单模板段王-厚普.docx`
 
 If the user does not specify a company, ask which one to use. Do not guess.
 
@@ -98,7 +98,7 @@ To fix overflows, adjust column widths (`table.columns[i].width`), shrink long t
 ### Step 5: Deliver
 
 - Save final file to `D:/Kimi/output/报价单_<公司>_<客户简称>.docx`.
-- Copy it to the desktop: `C:/Users/yesli/OneDrive/桌面/报价单_<公司>_<客户简称>.docx`.
+- Copy it to the desktop: `C:/Users/yesli/Desktop/报价单_<公司>_<客户简称>.docx`.
 - Verify the desktop copy exists and has the same byte size as the output copy.
 - Tell the user the desktop path and the total amount.
 
@@ -129,3 +129,32 @@ Use terms consistent with the source contract. Common defaults:
 - `本报价单有效期30天。`
 
 If the source contract uses different terms, use those instead.
+
+## 梅花集团报价流程 (Meihua inquiry + annual contract)
+
+Use this dedicated flow whenever the source is a 梅花询价单 xlsx (filename like `...询价单.xlsx`, sheet named `<基地>-订单`) plus the 梅花年度合同 PDF. The quoting company is always **北京国华** (乙方 of the annual contract).
+
+### Inputs
+
+- **询价单 xlsx**: header rows give 需方 (吉林梅花/新疆梅花/通辽梅花), 询价单位 `梅花集团采购部`, 询价联系人 `田帅鹏 18031609705`. The item table columns are: `序号 | 五金编码 | 名称型号 | 数量 | 单位 | 单价 | 金额 | 使用部门 | 备注 | 基地 | 货期 | 运输方式`. 单价/金额 are blank — they must come from the annual contract.
+- **年度合同 PDF**: the user usually passes the path; otherwise look in `D:/YeslipW/021-Daily/1-Contract/` for the latest `梅花*年度合同.pdf`. **It is a scanned PDF with no text layer** — `page.get_text()` returns empty. Render every page to PNG at 200 dpi with `fitz` and read the images visually.
+
+### Pricing: match against 附件1 定标清单
+
+The contract's last pages hold `附件1 定标清单` with columns: `序号 | 执行基地 | 物料代码 | 长描述 | 单位 | 含税含运费单价 | 品牌 | 货期 | 质保期 | 备注`.
+
+- Match each inquiry item by code: 询价单 **五金编码** = 清单 **物料代码**. Do not match by name alone — names can differ slightly.
+- Take **含税含运费单价** as the unit price.
+- Split the inquiry's 名称型号 at `\`: part before it is 产品名称, part after is 规格型号 with the trailing brand word `国华` dropped (e.g. `跳汰机畚斗\YSD02-002 316L 国华` → 名称 `跳汰机畚斗`, 规格 `YSD02-002 316L`).
+
+### Fixed field values
+
+- 收件单位：`梅花集团采购部`；收件人：`田帅鹏`；电话：`18031609705`
+- 关于：`跳汰机配件报价` (or adapt to the actual items)
+- Note paragraph (replaces the template's `注：本报价未税含运费。`), derived from contract clauses 5.5/6.2/6.3 and 附件1:
+
+  `注：本报价含13%增值税专用发票，含运费；付款方式：货到验收合格后付款（电汇50%，银行承兑50%）；货期30天，质保期12个月；本报价有效期30天。`
+
+  If a newer annual contract changes these terms, follow the newer contract.
+
+Everything else (template, generation, layout gate, delivery) follows the standard workflow above.
